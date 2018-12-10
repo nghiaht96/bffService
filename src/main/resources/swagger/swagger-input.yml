@@ -1,0 +1,666 @@
+swagger: "2.0"
+info:
+  version: 1.0.0
+  title: BFF SERVICE
+  description: this is BFF SERVICE... be careful!
+  termsOfService: 'http://swagger.io/terms/'
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+tags:
+- name: book
+  description: connect to book service
+- name: account
+  description:  connect to account service
+- name: ticket
+  description: conenct to ticket service
+schemes:
+- https
+- http
+paths:
+  /v1/library/books/:
+    put:
+      tags:
+      - book
+      summary: Upsert book
+      description: insert or update book
+      operationId: upsertBook
+      consumes:
+      - application/json
+      produces:
+      - text/plain
+      parameters:
+      - in: body
+        name: book
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: string
+            description: id book
+        '400':
+          description: 'Bad request, validation error'
+        '500':
+          description: Internal Server Error
+    post:
+      tags:
+      - book
+      summary: Upsert Multi book
+      description: Upsert Multi book
+      operationId: upsertMultiBooks
+      produces:
+      - application/json
+      consumes:
+      - application/json
+      parameters:
+      - in: body
+        name: books
+        description: Array of book.
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          schema:
+            type: array
+            items:
+              type: string
+          description: |
+            List of Book Ids of the being created/updated book.
+            The Id will be empty string if it is failed to upsert the book.
+        '400':
+          description: 'Bad request, validation error'
+        '500':
+          description: Internal Server Error
+    get:
+      tags:
+      - book
+      summary: Search book
+      description: |
+        Search Book by Title of book, Author, Publishing year, ISBN number,
+        Short description, Status, Total number of borrowing ticket.
+      operationId: searchBook
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: title
+        type: string
+        required: false
+      - in: query
+        name: author
+        type: string
+        required: false
+      - in: query
+        name: publishedYear
+        type: string
+        required: false
+      - in: query
+        name: isbn
+        type: string
+        required: false
+      - in: query
+        name: shortDescription
+        type: string
+        required: false
+      responses:
+        '200':
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Book'
+          description: Array of the json book
+        '500':
+          description: Internal Server Error
+    delete:
+      tags:
+      - book
+      summary: Delete Multi book
+      description: Delete Multi book
+      operationId: deleteMultiBook
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: listId
+        schema:
+          type: array
+          items:
+            type: string
+        description: List idBook to delete
+      responses:
+        '200':
+          schema:
+            type: array
+            items:
+              type: string
+          description: |
+            List of Book IDs of the being deleted book.
+            The ID will be empty string if it is failed to delete the book.
+        '500':
+          description: Internal Server Error
+  /v1/library/books/searchByStatus/:
+    get:
+      tags:
+      - book
+      summary: search book by status
+      description: search book by status
+      operationId: searchBookByStatus
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: status
+        description: status of book
+        required: true
+        type: boolean
+      responses:
+        '200':
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Book'
+          description:  book which you need to find'
+        '400':
+          description: 'Bad request, validation error'
+        '500':
+          description: Internal Server Error
+  /v1/library/books/searchByNumberTicket/:
+    get:
+      tags:
+      - book
+      summary:  search book by number of borrowing ticket
+      description:  search book by number of borrowing ticket
+      operationId: searchByNumberBorrowingTicket
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: numberBorrowingTicket
+        description: number borrowing ticket
+        required: true
+        type: integer
+      responses:
+        '200':
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Book'
+          description:  book which you need to find'
+        '400':
+          description: 'Bad request, validation error'
+        '500':
+          description: Internal Server Error
+  /v1/library/books/{id}:
+    get:
+      tags:
+      - book
+      summary: search book by bookid
+      description: search book by bookid
+      operationId: searchBookById
+      produces:
+      - application/json
+      parameters:
+      - in: path
+        name: id
+        description: id of book
+        required: true
+        type: string
+      responses:
+        '200':
+          schema:
+            $ref: '#/definitions/Book'
+          description:  book which you need to find'
+        '400':
+          description: 'Bad request, validation error'
+        '500':
+          description: Internal Server Error
+    delete:
+      tags:
+      - book
+      summary: delete book by id
+      description: delete one book by its id
+      operationId: deleteBookById
+      produces:
+      - text/plain
+      parameters:
+      - in: path
+        name: id
+        description: id of book
+        required: true
+        type: string
+      responses:
+        '200':
+          schema:
+            type: string
+          description:  book which you need to find'
+        '400':
+          description: 'Bad request, validation error'
+        '500':
+          description: Internal Server Error
+  /v1/tickets/:
+    post:
+      tags:
+      - ticket
+      summary: Upsert ticket
+      operationId: upsertTicket
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: ticket
+        required: true
+        schema:
+          $ref: '#/definitions/ticket'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: string
+            description: idTicket
+        '400':
+          description: 'Bad request, validation error'
+        '500':
+          description: Internal Server Error
+  /v1/tickets/countTicketByIsbn:
+    get:
+      tags:
+      - ticket
+      summary: search ticket by isbn of book
+      description: search ticket by isbn of book
+      operationId: searchTicketByIsbn
+      parameters:
+      - in: query
+        name: isbn
+        required: true
+        type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ticket'
+        500:
+          description: Internal Server Error
+  '/v1/tickets/{idTicket}':
+    get:
+      tags:
+      - ticket
+      summary: Get ticket by idTicket
+      operationId: getTicketByIdTicket
+      produces:
+      - application/json
+      parameters:
+      - in: path
+        name: idTicket
+        required: true
+        type: string
+      responses:
+        '200':
+          description: succesfull operation
+          schema:
+            $ref: '#/definitions/ticket'
+        '400':
+          description: Invalid idTicket supplied
+        '500':
+          description: Internal Server Error
+    delete:
+      tags:
+      - ticket
+      summary: Delete Ticket
+      operationId: deleteTicket
+      produces:
+      - application/json
+      parameters:
+      - name: idTicket
+        in: path
+        description: The idTicket that needs to be deleted
+        required: true
+        type: string
+      responses:
+        '200':
+          description: Deleted succsessfully
+          schema:
+            type: string
+        '400':
+          description: Invalid idTicket supplied
+        '404':
+          description: Ticket not found
+        '500':
+          description: Internal Server Error
+  '/v1/tickets/totalBorrowingTicketOfBook':
+    get:
+      tags:
+      - ticket
+      summary: Get total borrowing Ticket of Book
+      description: Get total borrowing Ticket of Book
+      operationId: getTotalBorrowingOfBook
+      parameters:
+      - in: query
+        name: isbn
+        required: true
+        type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            type: string
+            description: total borrowing book number
+  '/v1/tickets/{idTicket}/setLimitBook':
+    put:
+      tags:
+      - ticket
+      summary: Set limit borrowing book
+      description: Set limit borrowing book
+      operationId: setLimitBorrowingBook
+      parameters:
+      - in: path
+        name: idTicket
+        required: true
+        type: string
+      - in: query
+        name: limitBookNumber
+        type: integer
+        required: true
+      responses:
+        200:
+          description: OK
+        500:
+          description: Internal Server Error
+  '/v1/tickets/{idTicket}/returnBook':
+    put:
+      tags:
+      - ticket
+      summary: Return Book
+      operationId: returnBook
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: listIsbn
+        required: true
+        schema:
+          type: array
+          items:
+            type: string
+      - in: path
+        name: idTicket
+        required: true
+        type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              type: string
+            description: List ISBN of book
+  '/v1/tickets/statisticsForNumberBorrowingTicket':
+    get:
+      tags:
+      - ticket
+      summary: Statistics for number of borrowing tickets weekly/monthly/yearly
+      description: Statistics for number of borrowing tickets weekly/monthly/yearly
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: type
+        description: WEEKLY OR MONTHLY OR YEARLY
+        type: string
+        enum: [WEEKLY, MONTHLY, YEARLY]
+        required: true
+      operationId: statisticsNumberBorrowingTicket
+      responses:
+        200:
+          description: OK
+          schema:
+            type: string
+        500:
+          description: Internal Server Error
+  '/v1/tickets/statisticsIncome':
+    get:
+      tags:
+      - ticket
+      summary: Statistics Income weekly/monthly/yearly
+      description: Statistics Income weekly/monthly/yearly
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: type
+        description: WEEKLY OR MONTHLY OR YEARLY
+        type: string
+        enum: [WEEKLY, MONTHLY, YEARLY]
+        required: true
+      operationId: statisticsIncome
+      responses:
+        200:
+          description: OK
+          schema:
+            type: string
+        500:
+          description: Internal Server Error
+
+  /v1/library/users/:
+    post:
+      tags:
+      - user
+      summary: Upsert user
+      description: Registry user
+      operationId: upsertUser
+      produces:
+      - application/json
+      parameters:
+      - in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/user'
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: string
+            description: id upserted
+        '400':
+          description: 'Bad request, validation error'
+        '500':
+          description: Internal Server Error
+  /v1/library/users/login:
+    get:
+      tags:
+      - user
+      summary: Login user
+      description: Loggin user
+      operationId: loginUser
+      produces:
+      - application/json
+      parameters:
+      - in: query
+        name: username
+        required: true
+        type: string
+      - in: query
+        name: password
+        required: true
+        type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: string
+            description: Login successfull
+        '500':
+          description: Internal Server Error
+  /v1/library/users/logout:
+    get:
+      tags:
+      - user
+      summary: Logout user
+      description: Logout current user
+      operationId: logoutUser
+      produces:
+      - application/json
+      responses:
+        default:
+          description: Logout successfull
+  '/v1/library/users/{username}':
+    get:
+      tags:
+      - user
+      summary: Get user by username
+      operationId: getUserByUsername
+      produces:
+      - application/json
+      parameters:
+      - in: path
+        name: username
+        required: true
+        type: string
+      responses:
+        '200':
+          description: succesfull operation
+          schema:
+            $ref: '#/definitions/user'
+        '400':
+          description: Invalid username supplied
+        '500':
+          description: Internal Server Error
+    delete:
+      tags:
+      - user
+      summary: Delete user
+      operationId: deleteUser
+      produces:
+      - application/json
+      parameters:
+      - name: username
+        in: path
+        description: The name that needs to be deleted
+        required: true
+        type: string
+      responses:
+        '200':
+          description: Deleted succsessfully
+          schema:
+            type: string
+        '400':
+          description: Invalid username supplied
+        '404':
+          description: User not found
+definitions:
+  Book:
+    type: object
+    properties:
+      id:
+        type: string
+      isbn:
+        type: string
+      title:
+        type: string
+      publishedYear:
+        type: string
+      description:
+        type: string
+      status:
+        type: boolean
+      deleted:
+        type: boolean
+        example: false
+      author:
+        type: string
+        example: Nguyen Van A
+      actualQuantity:
+        type: integer
+        example: 1
+      currentQuantity:
+        type: integer
+        example: 1
+      modifiedDate:
+        type: string
+        format: date
+      createDate:
+        type: string
+        format: date
+  ticketDetail:
+    type: object
+    properties:
+      id:
+        type: string
+        example: 0
+      isbn:
+        type: string
+        example: 0
+      idTicket:
+        type: string
+        example: 0
+      fee:
+        type: number
+        format: double
+        example: 3.5
+      returnDate:
+        type: string
+        format: date
+        example: '2019-1-3'
+      returnStatus:
+        type: boolean
+        default: false
+  ticket:
+    type: object
+    properties:
+      id:
+        type: string
+        example: 0
+      username:
+        type: string
+        example: 0
+      ticketDetails:
+        type: array
+        items:
+          $ref: '#/definitions/ticketDetail'
+      totalFee:
+        type: number
+        format: double
+        example: 10.0
+      limitBook:
+        type: integer
+        example: 3
+  user:
+    type: object
+    properties:
+      id:
+        type: string
+        example: 0
+      username:
+        type: string
+        example: nam123
+        pattern: "[A-Za-z0-9_]+"
+      password:
+        type: string
+        example: 123456
+      email:
+        type: string
+        format: email
+        example: nam123@gmail.com
+      firstName:
+        type: string
+        example: Nam
+      lastName:
+        type: string
+        example: Nguyen
+      dob:
+        type: string
+        format: date
+        example: '1996-03-16'
+      role:
+        type: string
+        example: BORROWER

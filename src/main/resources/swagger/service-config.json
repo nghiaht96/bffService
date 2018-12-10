@@ -1,0 +1,13 @@
+{
+  "artifactId": "bff-service",
+  "basePackage": "com.dxc.bffService",
+  "apiPackage": "com.dxc.bffService.api",
+  "configPackage": "com.dxc.bffService.api.config",
+  "modelPackage": "com.dxc.bffService.api.model",
+  "delegatePattern": "true",
+  "hideGenerationTimestamp": "true",
+  "useBeanValidation": "true",
+  "dateLibrary": "joda",
+  "sourceFolder": "generated-sources/src/main/java"
+}
+
